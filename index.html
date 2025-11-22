@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Respostas Padrão — Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1724; /* deep background for modern neon look */
+  --card:#0b1220;
+  --muted:#9aa4b2;
+  --texto:#e6eef8;
+  --accent:#0f62fe; /* blue */
+  --neon:#00ffd5; /* neon teal accent */
+  --radius:12px;
+}
+*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+body{margin:0;background:linear-gradient(180deg,#041026 0%, #071526 100%);color:var(--texto);min-height:100vh}
+.wrap{max-width:1200px;margin:28px auto;padding:20px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:60px;height:60px;background:linear-gradient(135deg,#0836b8,#00c6b0);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;box-shadow:0 8px 30px rgba(0,200,180,0.08)}
+h1{margin:0;font-size:20px}
+.p-lead{margin:0;color:var(--muted);font-size:13px}
+.top-actions{display:flex;gap:8px;align-items:center}
+.btn{background:linear-gradient(90deg,var(--accent),#6a5cff);color:#fff;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;box-shadow:0 10px 40px rgba(15,98,254,0.12);font-weight:600}
+.btn.ghost{background:transparent;color:var(--muted);box-shadow:none;border:1px solid rgba(255,255,255,0.04)}
+.grid{display:grid;grid-template-columns:280px 1fr;gap:18px}
+.sidebar{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:var(--radius);padding:16px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+.search{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--texto)}
+.categories{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.cat{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer;color:var(--texto)}
+.cat:hover{background:rgba(255,255,255,0.02)}
+.cat.active{background:linear-gradient(90deg,rgba(15,98,254,0.12),rgba(0,255,213,0.03));box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02)}
+.content{padding:18px;background:linear-gradient(180deg,#05122a,#041124);border-radius:var(--radius);box-shadow:0 10px 40px rgba(2,6,23,0.6)}
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(6px)}
+.card h3{margin:0;font-size:15px}
+.card p{margin:8px 0;color:var(--muted);font-size:13px;min-height:44px}
+.meta{display:flex;align-items:center;justify-content:space-between}
+.chip{padding:6px 8px;border-radius:999px;font-size:12px;background:rgba(15,98,254,0.12);color:var(--accent)}
+.modal-wrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.7);padding:18px}
+.modal{width:760px;max-width:98%;background:linear-gradient(180deg,#071526,#041124);border-radius:12px;padding:18px;box-shadow:0 40px 120px rgba(0,0,0,0.8)}
+.modal pre{white-space:pre-wrap;font-size:14px;line-height:1.6;color:var(--texto)}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.admin-btn{position:fixed;right:18px;bottom:18px;background:linear-gradient(90deg,#00ffd5,#0f62fe);padding:14px;border-radius:999px;border:0;cursor:pointer;box-shadow:0 20px 60px rgba(0,255,213,0.08);font-weight:700}
+@media (max-width:880px){.grid{grid-template-columns:1fr}.admin-btn{right:12px;bottom:12px}}
+.small{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">CSC</div>
+        <div>
+          <h1>Respostas Padrão — Painel</h1>
+          <div class="p-lead">Painel público — selecione uma categoria e copie a resposta.</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn ghost" onclick="window.location.reload()">Atualizar</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <aside class="sidebar">
+        <input id="q" class="search" placeholder="Pesquisar (texto, categoria)..." oninput="renderCards()">
+        <div class="categories" id="categories"></div>
+      </aside>
+
+      <main class="content">
+        <div class="toolbar">
+          <div><strong id="catTitle">Todas as respostas</strong><div class="small" id="catCount" style="color:var(--muted)"></div></div>
+          <div><button class="btn" onclick="document.getElementById('importFile').click()">Importar .docx</button></div>
+        </div>
+
+        <div class="cards" id="cards"></div>
+      </main>
+    </div>
+  </div>
+
+  <button class="admin-btn" title="Admin" onclick="openAdmin()">⚙️</button>
+
+  <div id="modalWrap" class="modal-wrap" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3 id="modalTitle"></h3>
+      <div id="modalSub" class="small" style="margin-bottom:8px"></div>
+      <pre id="modalText"></pre>
+      <div class="actions">
+        <button class="btn ghost" onclick="closeModal()">Fechar</button>
+        <button class="btn" onclick="copyModalText()">📋 Copiar resposta</button>
+      </div>
+    </div>
+  </div>
+
+  <input id="importFile" type="file" accept=".docx" style="display:none" onchange="handleLocalImport(event)">
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- mammoth (browser) -->
+  <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+
+  <script>
+    // ========== CONFIGURAÇÃO SUPABASE ==========
+    const supabaseUrl = "https://blvtnplpbckvoqxkeelo.supabase.co";
+    const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsdnRucGxwYmNrdm9xeGtlZWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MTI0MDIsImV4cCI6MjA3OTM4ODQwMn0.vPHgftig14JSgYe1O3RcXwaAhZoX1cfPmINKd04X9_w";
+    const supabase = supabaseJs.createClient(supabaseUrl, supabaseAnonKey);
+
+    let todas = [];
+    let categorias = [];
+    let catAtual = null;
+
+    async function carregarTudo(){
+      const { data, error } = await supabase.from('respostas').select('*').order('criado_em', {ascending:false});
+      if (error) { console.error(error); alert('Erro ao carregar dados'); return; }
+      todas = data;
+      montarCategorias();
+      renderCards();
+    }
+
+    function montarCategorias(){
+      const mapa = {};
+      todas.forEach(r => { mapa[r.categoria] = (mapa[r.categoria]||0) + 1; });
+      categorias = Object.keys(mapa).sort();
+      const cont = document.getElementById('categories'); cont.innerHTML='';
+      const allBtn = document.createElement('div'); allBtn.className='cat ' + (catAtual===null?'active':''); allBtn.innerHTML = '<div>📚</div><div style="margin-left:6px">Todas</div><div style="margin-left:auto;color:var(--muted)">'+todas.length+'</div>'; allBtn.onclick = ()=>{ catAtual=null; renderCards(); };
+      cont.appendChild(allBtn);
+      categorias.forEach(c=>{
+        const d = document.createElement('div'); d.className = 'cat' + (catAtual===c?' active':'');
+        d.innerHTML = `<div>🏷️</div><div style="margin-left:6px">${c}</div><div style="margin-left:auto;color:var(--muted)">${mapa[c]}</div>`;
+        d.onclick = ()=>{ catAtual = c; renderCards(); };
+        cont.appendChild(d);
+      });
+    }
+
+    function renderCards(){
+      const q = (document.getElementById('q').value||'').toLowerCase().trim();
+      const cards = document.getElementById('cards');
+      let lista = todas.slice();
+      if (catAtual) lista = lista.filter(x => x.categoria === catAtual);
+      if (q) lista = lista.filter(x => (x.titulo||'').toLowerCase().includes(q) || (x.texto||'').toLowerCase().includes(q) || (x.subcategoria||'').toLowerCase().includes(q));
+      document.getElementById('catTitle').innerText = catAtual || 'Todas as respostas';
+      document.getElementById('catCount').innerText = lista.length + ' resultados';
+      cards.innerHTML = '';
+      if (!lista.length) { cards.innerHTML = '<div style="color:var(--muted)">Nenhuma resposta encontrada.</div>'; return; }
+      lista.forEach(it=>{
+        const el = document.createElement('div'); el.className='card';
+        el.innerHTML = `<h3>${escapeHtml(it.titulo)}</h3><p>${escapeHtml(it.subcategoria||'')}<br><small class="small">${(it.text||'').slice(0,240)}${it.text && it.text.length>240 ? '...' : ''}</small></p><div class="meta"><div class="chip">${it.versao||'V1'}</div><div><button class="btn ghost" onclick="abrirModal('${it.id}')">Abrir</button></div></div>`;
+        cards.appendChild(el);
+      });
+    }
+
+    function escapeHtml(s){ if(!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    async function abrirModal(id){
+      const { data, error } = await supabase.from('respostas').select('*').eq('id', id).limit(1).single();
+      if (error) { console.error(error); alert('Erro'); return; }
+      document.getElementById('modalTitle').innerText = data.titulo;
+      document.getElementById('modalSub').innerText = (data.categoria || '') + (data.subcategoria? ' • ' + data.subcategoria : '');
+      document.getElementById('modalText').innerText = data.texto || '';
+      document.getElementById('modalWrap').style.display = 'flex';
+    }
+    function closeModal(e){ if(!e || e.target.id==='modalWrap') document.getElementById('modalWrap').style.display = 'none'; }
+    function copyModalText(){ const text = document.getElementById('modalText').innerText; navigator.clipboard.writeText(text).then(()=>alert('Resposta copiada!')); }
+
+    function openAdmin(){ window.open('admin.html','_blank'); }
+
+    // ----- Import local .docx via browser (fallback manual) -----
+    function handleLocalImport(e){
+      const f = e.target.files[0];
+      if (!f) return;
+      mammoth.convertToHtml({arrayBuffer: f.arrayBuffer()})
+        .then(res => {
+          // abertura da janela com HTML convertido pra você revisar rapidamente
+          const w = window.open('', '_blank');
+          w.document.write('<h3>HTML convertido — revise e copie para o Admin</h3>');
+          w.document.write('<div style="white-space:pre-wrap;color:#ddd;font-family:monospace">'+res.value.replace(/</g,'&lt;')+'</div>');
+          w.document.title = 'Import .docx';
+          alert('Arquivo convertido. Abra a nova aba e copie os blocos para o Admin.');
+        })
+        .catch(err => { console.error(err); alert('Erro ao converter .docx: '+err.message); });
+    }
+
+    // inicializa
+    carregarTudo();
+  </script>
+</body>
+</html>
